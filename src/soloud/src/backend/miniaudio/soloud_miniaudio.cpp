@@ -405,7 +405,10 @@ namespace SoLoud
 #elif defined(__ANDROID__)
         // When low-latency is disabled the device runs on the legacy mixer path
         // (set above). Also tag the AAudio stream as media/music and explicitly
-        // allow capture so system screen recorders pick up the audio.
+        // allow capture so system screen recorders pick up the audio. These are
+        // just initial defaults: as recommended by the audio_session plugin,
+        // apply your own AudioAttributes after init to override them. See the
+        // override handling in miniaudio_changeDevice_impl().
         if (!gMiniaudioLowLatency)
         {
             deviceConfig.aaudio.usage                = ma_aaudio_usage_media;
@@ -560,8 +563,12 @@ namespace SoLoud
 #if defined(__ANDROID__)
         if (!gMiniaudioLowLatency)
         {
-            deviceConfig.aaudio.usage                = ma_aaudio_usage_media;
-            deviceConfig.aaudio.contentType          = ma_aaudio_content_type_music;
+            // This path runs on device changes during the app's lifetime, so we
+            // deliberately do NOT re-apply usage/contentType here: doing so would
+            // overwrite any AudioAttributes the user has set (e.g. via the
+            // audio_session plugin) after init. AAudio defaults the unset usage to
+            // MEDIA, which is capturable, so re-applying the capture policy is
+            // enough to keep the output recordable across device changes.
             deviceConfig.aaudio.allowedCapturePolicy = ma_aaudio_allow_capture_by_all;
         }
 #endif

@@ -347,6 +347,13 @@ interface class SoLoud {
   /// instead: the output becomes capturable by screen recording and gains
   /// callback headroom for DSP, at the cost of higher output latency. Only the
   /// native (miniaudio) backends honor this; the Web backend ignores it.
+  ///
+  /// Note: on Android, `lowLatency: false` tags the AAudio stream with
+  /// `usage = media` and `contentType = music`. These are only sensible
+  /// defaults applied at init; if you manage `AudioAttributes` externally
+  /// (e.g. via the `audio_session` plugin), apply your configuration after
+  /// `init()` to override them — SoLoud does not re-apply them afterwards. The
+  /// default low-latency mode leaves these attributes untouched entirely.
   Future<void> init({
     PlaybackDevice? device,
     bool automaticCleanup = false,
